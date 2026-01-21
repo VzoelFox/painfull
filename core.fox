@@ -1,0 +1,22 @@
+finit
+; String "HELLO\n" (6 chars)
+; Hex: 48 45 4C 4C 4F 0A
+; Little Endian: 0x0A4F4C4C4548
+mov rax, 0x0A4F4C4C4548
+push rax
+
+; sys_write(1, rsp, 6)
+mov rax, 1
+mov rdi, 1
+mov rsi, rsp
+mov rdx, 6
+syscall
+
+; Clean stack
+pop rax
+
+; Exit
+mov rax, 60
+mov rdi, 0
+syscall
+tutup_fungsi

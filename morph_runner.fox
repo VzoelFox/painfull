@@ -1,0 +1,77 @@
+fungsi main
+    ; --- Entry Point ---
+    ; Stack: [argc, argv0, argv1, ...]
+
+    pop r15 ; r15 = argc
+    pop r14 ; argv0 (ignore)
+
+    ; Cek argc (harus >= 2)
+    cmp r15, 2
+    jika_kurang
+        mov rax, 60
+        mov rdi, 1
+        syscall
+    tutup_jika
+
+    ; Ambil filename (argv1) ke r13 (Register Aman/Saved)
+    pop r13
+
+    ; --- Print Startup Banner "Morph\n" ---
+    mov rax, 0x0A6870726F4D
+    push rax
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, rsp
+    mov rdx, 6
+    syscall
+    pop rax ; Clean stack
+
+    ; --- Open File ---
+    ; Restore filename dari r13 ke rdi
+    mov rdi, r13
+    mov rax, 2
+    mov rsi, 0
+    mov rdx, 0
+    syscall
+
+    mov r8, rax ; r8 = fd
+
+    ; Cek error open (rax < 0)
+    cmp rax, 0
+    jika_kurang
+        mov rax, 60
+        mov rdi, 2
+        syscall
+    tutup_jika
+
+    ; --- Read Loop ---
+    sub rsp, 1024
+
+    ; sys_read(fd, buf, 1024)
+    mov rax, 0
+    mov rdi, r8
+    mov rsi, rsp
+    mov rdx, 1024
+    syscall
+
+    mov r9, rax ; bytes read
+
+    ; sys_write(1, buf, bytes_read)
+    mov rax, 1
+    mov rdi, 1
+    mov rsi, rsp
+    mov rdx, r9
+    syscall
+
+    ; --- Close ---
+    mov rax, 3
+    mov rdi, r8
+    syscall
+
+    add rsp, 1024
+
+    ; Exit
+    mov rax, 60
+    mov rdi, 0
+    syscall
+tutup_fungsi
